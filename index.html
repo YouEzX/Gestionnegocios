@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App de Pedidos</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: auto;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+
+    h2 {
+      color: #ff5722;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background-color: #fff3e0;
+      margin-bottom: 10px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    button {
+      background-color: #ff5722;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #e64a19;
+    }
+
+    #carrito {
+      margin-top: 30px;
+    }
+
+    #total {
+      font-size: 18px;
+      color: #333;
+    }
+
+    .pagar-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    #mensaje {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #dcedc8;
+      color: #33691e;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+    }
+
+    /*  Botón flotante para ver módulos */
+    #ver-modulos-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #03a9f4;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+
+    #modulos-section {
+      display: none;
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #e3f2fd;
+      border-radius: 10px;
+    }
+
+    #modulos-section h3 {
+      margin-top: 20px;
+      color: #0277bd;
+    }
+
+    #modulos-section p {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    #modulos-section img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!--  INICIO MÓDULO 1: MENÚ DEL RESTAURANTE -->
+    <h2>📋 Menú del Restaurante</h2>
+    <ul id="menu-list"></ul>
+    <!--  FIN MÓDULO 1 -->
+
+    <!--  INICIO MÓDULO 2: CARRITO DE COMPRAS -->
+    <div id="carrito">
+      <h2>🛒 Tu Pedido</h2>
+      <ul id="carrito-list"></ul>
+      <p><strong>Total: RD$<span id="total">0</span></strong></p>
+      <button class="pagar-btn" onclick="pagar()">💳 Pagar ahora</button>
+    </div>
+    <!--  FIN MÓDULO 2 -->
+
+    <!--  INICIO MÓDULO 3: MENSAJE DE CONFIRMACIÓN -->
+    <div id="mensaje"></div>
+    <!--  FIN MÓDULO 3 -->
+
+    <!--  INICIO MÓDULO 4: SECCIÓN DE VISUALIZACIÓN DE MÓDULOS -->
+    <div id="modulos-section">
+      <h2> Módulos de la App</h2>
+      <p>A continuación puedes ver las capturas de cada módulo con su nombre y función:</p>
+
+      <div>
+        <h3> Módulo 1: Menú del Restaurante</h3>
+        <p>Este módulo muestra los platos disponibles y permite agregarlos al carrito.</p>
+        <img src="https://i.imgur.com/XWV7ced.png" alt="Módulo 1">
+      </div>
+
+      <div>
+        <h3> Módulo 2: Carrito de Compras</h3>
+        <p>Este módulo muestra los productos seleccionados y el total acumulado.</p>
+        <img src="https://i.imgur.com/inSZNPZ.png" alt="Módulo 2">
+      </div>
+
+      <div>
+        <h3> Módulo 3: Pago Simulado</h3>
+        <p>Este módulo simula el pago y muestra un mensaje de confirmación.</p>
+        <img src="https://i.imgur.com/B9pVEV8.png" alt="Módulo 3">
+      </div>
+    </div>
+    <!--  FIN MÓDULO 4 -->
+
+  </div>
+
+  <!--  Botón flotante -->
+  <button id="ver-modulos-btn" onclick="mostrarModulos()">Ver módulos</button>
+
+  <script>
+    //  INICIO MÓDULO 1: MENÚ DEL RESTAURANTE
+    const menu = {
+      "Hamburguesa Clásica": 250,
+      "Pizza pepperoni": 400,
+      "Ensalada": 200,
+      "Refresco Coca-Cola": 100
+    };
+
+    const menuList = document.getElementById("menu-list");
+
+    for (let plato in menu) {
+      let item = document.createElement("li");
+      item.innerHTML = `
+        <span>${plato}: RD$${menu[plato]}</span>
+        <button onclick="agregarAlCarrito('${plato}', ${menu[plato]})">Agregar</button>
+      `;
+      menuList.appendChild(item);
+    }
+    //  FIN MÓDULO 1
+
+    //  INICIO MÓDULO 2: CARRITO DE COMPRAS
+    const carritoList = document.getElementById("carrito-list");
+    const totalSpan = document.getElementById("total");
+    const mensaje = document.getElementById("mensaje");
+
+    let carrito = [];
+    let total = 0;
+
+    function agregarAlCarrito(plato, precio) {
+      carrito.push({ plato, precio });
+      total += precio;
+      actualizarCarrito();
+      mensaje.style.display = "none";
+    }
+
+    function actualizarCarrito() {
+      carritoList.innerHTML = "";
+      carrito.forEach((item) => {
+        let li = document.createElement("li");
+        li.innerHTML = `<span>${item.plato}: RD$${item.precio}</span>`;
+        carritoList.appendChild(li);
+      });
+      totalSpan.textContent = total;
+    }
+    // FIN MÓDULO 2
+
+    // INICIO MÓDULO 3: PAGO DE CARRITO
+    function pagar() {
+      if (carrito.length === 0) {
+        mostrarMensaje("Tu carrito está vacío. Agrega algo antes de pagar.", "#ffccbc", "#bf360c");
+      } else {
+        mostrarMensaje("¡Gracias por tu compra! Total pagado: RD$" + total, "#dcedc8", "#33691e");
+        carrito = [];
+        total = 0;
+        actualizarCarrito();
+      }
+    }
+
+    function mostrarMensaje(texto, fondo, color) {
+      mensaje.textContent = texto;
+      mensaje.style.backgroundColor = fondo;
+      mensaje.style.color = color;
+      mensaje.style.display = "block";
+    }
+    //  FIN MÓDULO 3
+
+    //  INICIO MÓDULO 4: MOSTRAR SECCIÓN DE MÓDULOS
+    function mostrarModulos() {
+      const seccion = document.getElementById("modulos-section");
+      seccion.style.display = seccion.style.display === "none" ? "block" : "none";
+    }
+    //  FIN MÓDULO 4
+  </script>
+
+<!-- 🔹 Contenedor para imagen ampliada -->
+<div id="imagen-ampliada" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+  <img id="imagen-grande" src="" alt="Imagen ampliada" style="max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 20px rgba(0,0,0,0.5); cursor:pointer;">
+</div>
+
+<script>
+  // Mostrar imagen ampliada al hacer clic
+  document.querySelectorAll('#modulos-section img').forEach(img => {
+    img.addEventListener('click', () => {
+      const ampliada = document.getElementById('imagen-ampliada');
+      const imagenGrande = document.getElementById('imagen-grande');
+      imagenGrande.src = img.src;
+      ampliada.style.display = 'flex';
+    });
+  });
+
+  // Cerrar imagen ampliada al hacer clic sobre ella
+  document.getElementById('imagen-ampliada').addEventListener('click', () => {
+    document.getElementById('imagen-ampliada').style.display = 'none';
+  });
+</script>
+
+</body>
+</html>
