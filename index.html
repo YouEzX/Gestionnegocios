@@ -1,277 +1,1676 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App de Pedidos</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f8f8f8;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapsCRM — Gestión de Negocios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --surface: #151820;
+            --surface2: #1c2030;
+            --border: #252a3a;
+            --accent: #4f8ef7;
+            --accent2: #a78bfa;
+            --accent3: #34d399;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --text: #e8eaf0;
+            --text2: #8b90a0;
+            --text3: #5a5f72;
+            --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --glow: 0 0 20px rgba(79,142,247,0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
 
-    .container {
-      max-width: 480px;
-      margin: auto;
-      padding: 20px;
-      background-color: #ffffff;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border-radius: 10px;
-      margin-top: 30px;
-    }
+        /* ─── SIDEBAR ─── */
+        .layout { display: flex; min-height: 100vh; }
+        .sidebar {
+            width: 240px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+        .sidebar-logo {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-logo h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .sidebar-logo h1 span { color: var(--accent); }
+        .sidebar-logo p { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+        .sidebar-nav { padding: 1rem 0; flex: 1; }
+        .nav-section { padding: 0.5rem 1rem; font-size: 0.65rem; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 0.5rem; }
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.7rem 1.5rem;
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            border-left: 3px solid transparent;
+        }
+        .nav-item:hover { color: var(--text); background: var(--surface2); }
+        .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(79,142,247,0.08); }
+        .nav-item i { width: 18px; text-align: center; }
+        .sidebar-stats {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .sidebar-stat { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-size: 0.82rem; }
+        .sidebar-stat span:first-child { color: var(--text2); }
+        .sidebar-stat .val { font-weight: 600; font-family: 'Syne', sans-serif; }
+        .val-blue { color: var(--accent); }
+        .val-green { color: var(--accent3); }
+        .val-yellow { color: var(--warning); }
+        .val-purple { color: var(--accent2); }
 
-    h2 {
-      color: #ff5722;
-      text-align: center;
-      margin-bottom: 20px;
-    }
+        /* ─── MAIN CONTENT ─── */
+        .main { margin-left: 240px; flex: 1; }
+        .topbar {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .topbar-left h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+        .topbar-left p { color: var(--text3); font-size: 0.8rem; margin-top: 2px; }
+        .topbar-actions { display: flex; gap: 0.5rem; }
+        .content { padding: 2rem; }
 
-    ul {
-      list-style: none;
-      padding: 0;
-    }
+        /* ─── BUTTONS ─── */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none; border-radius: 0.6rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: #6ba0f9; box-shadow: 0 4px 16px rgba(79,142,247,0.3); }
+        .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-success { background: rgba(52,211,153,0.15); color: var(--accent3); border: 1px solid rgba(52,211,153,0.3); }
+        .btn-success:hover { background: rgba(52,211,153,0.25); }
+        .btn-danger { background: rgba(248,113,113,0.15); color: var(--danger); border: 1px solid rgba(248,113,113,0.3); }
+        .btn-danger:hover { background: rgba(248,113,113,0.25); }
+        .btn-warning { background: rgba(251,191,36,0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.3); }
+        .btn-warning:hover { background: rgba(251,191,36,0.25); }
+        .btn-purple { background: rgba(167,139,250,0.15); color: var(--accent2); border: 1px solid rgba(167,139,250,0.3); }
+        .btn-purple:hover { background: rgba(167,139,250,0.25); }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.78rem; }
+        .btn-icon-only { padding: 0.5rem; width: 34px; height: 34px; justify-content: center; border-radius: 0.5rem; }
 
-    li {
-      background-color: #fff3e0;
-      margin-bottom: 10px;
-      padding: 10px 15px;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .card-header h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-header h3 i { color: var(--accent); font-size: 0.9rem; }
 
-    button {
-      background-color: #ff5722;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+        /* ─── FORM ─── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 0.4rem; }
+        .input-group.full-width { grid-column: 1 / -1; }
+        .input-group label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .input-group label i { color: var(--accent); font-size: 0.8rem; }
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            padding: 0.7rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79,142,247,0.1);
+        }
+        .input-group input::placeholder,
+        .input-group textarea::placeholder { color: var(--text3); }
+        .input-group select option { background: var(--surface2); }
+        .input-group textarea { resize: vertical; min-height: 80px; }
+        .help-text { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
 
-    button:hover {
-      background-color: #e64a19;
-    }
+        /* emails */
+        .emails-container { display: flex; flex-direction: column; gap: 0.4rem; }
+        .email-item { display: flex; gap: 0.4rem; align-items: center; }
+        .email-item input { flex: 1; }
+        .remove-email {
+            background: rgba(248,113,113,0.15);
+            border: 1px solid rgba(248,113,113,0.3);
+            color: var(--danger);
+            width: 32px; height: 32px;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .remove-email:hover { background: rgba(248,113,113,0.3); }
 
-    #carrito {
-      margin-top: 30px;
-    }
+        /* Stars */
+        .rating-stars { display: flex; gap: 0.3rem; padding: 0.4rem 0; }
+        .star { font-size: 1.6rem; color: var(--border); cursor: pointer; transition: all 0.15s; }
+        .star.active { color: var(--warning); filter: drop-shadow(0 0 4px rgba(251,191,36,0.5)); }
+        .star:hover { transform: scale(1.15); }
+        .rating-display .star { font-size: 0.9rem; }
+        .rating-display .star.active { color: var(--warning); }
+        .rating-display { display: flex; gap: 0.15rem; align-items: center; }
 
-    #total {
-      font-size: 18px;
-      color: #333;
-    }
+        /* ─── TABLE ─── */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        thead tr { border-bottom: 1px solid var(--border); }
+        th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: color 0.2s;
+        }
+        th:hover { color: var(--text2); }
+        td { padding: 0.85rem 1rem; border-bottom: 1px solid rgba(37,42,58,0.5); color: var(--text2); vertical-align: middle; }
+        tbody tr { cursor: pointer; transition: background 0.15s; }
+        tbody tr:hover { background: var(--surface2); }
+        tbody tr:last-child td { border-bottom: none; }
+        td strong { color: var(--text); font-weight: 600; }
 
-    .pagar-btn {
-      width: 100%;
-      margin-top: 15px;
-      padding: 10px;
-      font-size: 16px;
-    }
+        /* badges */
+        .badge {
+            padding: 0.3rem 0.7rem;
+            border-radius: 2rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            white-space: nowrap;
+        }
+        .badge-pendiente { background: rgba(251,191,36,0.1); color: var(--warning); border: 1px solid rgba(251,191,36,0.2); }
+        .badge-contactado { background: rgba(79,142,247,0.1); color: var(--accent); border: 1px solid rgba(79,142,247,0.2); }
+        .badge-interesado { background: rgba(52,211,153,0.1); color: var(--accent3); border: 1px solid rgba(52,211,153,0.2); }
+        .badge-cerrado { background: rgba(167,139,250,0.1); color: var(--accent2); border: 1px solid rgba(167,139,250,0.2); }
+        .badge-yo { background: rgba(79,142,247,0.08); color: var(--accent); border: 1px solid rgba(79,142,247,0.2); font-size: 0.68rem; }
+        .badge-amigo { background: rgba(167,139,250,0.08); color: var(--accent2); border: 1px solid rgba(167,139,250,0.2); font-size: 0.68rem; }
 
-    #mensaje {
-      margin-top: 20px;
-      padding: 15px;
-      background-color: #dcedc8;
-      color: #33691e;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: bold;
-      display: none;
-    }
+        /* action icons in table */
+        .row-actions { display: flex; gap: 0.3rem; flex-wrap: nowrap; }
+        .action-btn {
+            padding: 0.3rem 0.5rem;
+            border: none;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.78rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .ab-maps { background: rgba(79,142,247,0.12); color: var(--accent); }
+        .ab-maps:hover { background: rgba(79,142,247,0.25); }
+        .ab-ig { background: rgba(228,64,95,0.12); color: #e4405f; }
+        .ab-ig:hover { background: rgba(228,64,95,0.25); }
+        .ab-wa { background: rgba(37,211,102,0.12); color: #25d366; }
+        .ab-wa:hover { background: rgba(37,211,102,0.25); }
+        .ab-edit { background: rgba(251,191,36,0.12); color: var(--warning); }
+        .ab-edit:hover { background: rgba(251,191,36,0.25); }
+        .ab-del { background: rgba(248,113,113,0.12); color: var(--danger); }
+        .ab-del:hover { background: rgba(248,113,113,0.25); }
+        .ab-ai { background: rgba(167,139,250,0.12); color: var(--accent2); }
+        .ab-ai:hover { background: rgba(167,139,250,0.25); }
 
-    /*  Botón flotante para ver módulos */
-    #ver-modulos-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #03a9f4;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 50px;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    }
+        /* ─── SEARCH + FILTERS ─── */
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .search-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            padding: 0.5rem 0.8rem;
+            flex: 1;
+            max-width: 300px;
+        }
+        .search-wrap i { color: var(--text3); font-size: 0.85rem; }
+        .search-wrap input { background: none; border: none; color: var(--text); font-family: inherit; font-size: 0.88rem; outline: none; flex: 1; }
+        .search-wrap input::placeholder { color: var(--text3); }
+        .filter-pills { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .filter-pill {
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+            color: var(--text2);
+            background: transparent;
+        }
+        .filter-pill:hover { border-color: var(--accent); color: var(--accent); }
+        .filter-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
 
-    #modulos-section {
-      display: none;
-      margin-top: 30px;
-      padding: 15px;
-      background-color: #e3f2fd;
-      border-radius: 10px;
-    }
+        /* ─── MODAL ─── */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1.2rem;
+            max-width: 640px;
+            width: 92%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+            animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(16px) scale(0.98); } to { opacity: 1; transform: none; } }
+        .modal-header {
+            background: linear-gradient(135deg, #1a2540 0%, #1e1a35 100%);
+            padding: 1.5rem 2rem;
+            border-radius: 1.2rem 1.2rem 0 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .modal-header h2 { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; }
+        .modal-header .sub { color: var(--text3); font-size: 0.82rem; margin-top: 3px; }
+        .modal-close {
+            background: rgba(255,255,255,0.06);
+            border: none;
+            color: var(--text2);
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text); transform: rotate(90deg); }
+        .modal-body { padding: 1.5rem 2rem; }
+        .detail-row {
+            display: flex;
+            gap: 1rem;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-icon { width: 28px; height: 28px; background: var(--surface2); border-radius: 0.4rem; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+        .detail-label { font-size: 0.72rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-value { font-size: 0.9rem; color: var(--text); margin-top: 3px; word-break: break-word; }
+        .detail-value a { color: var(--accent); text-decoration: none; }
+        .detail-value a:hover { text-decoration: underline; }
+        .modal-footer {
+            padding: 1rem 2rem 1.5rem;
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
 
-    #modulos-section h3 {
-      margin-top: 20px;
-      color: #0277bd;
-    }
+        /* ─── AI SECTION ─── */
+        .ai-card {
+            background: linear-gradient(135deg, rgba(79,142,247,0.06) 0%, rgba(167,139,250,0.06) 100%);
+            border: 1px solid rgba(167,139,250,0.2);
+        }
+        .ai-card .card-header h3 i { color: var(--accent2); }
+        .ai-form { display: flex; flex-direction: column; gap: 1rem; }
+        .ai-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.8rem; }
+        .ai-output {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            padding: 1rem;
+            min-height: 100px;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: var(--text);
+            white-space: pre-wrap;
+            display: none;
+        }
+        .ai-output.visible { display: block; }
+        .ai-output.loading { color: var(--text3); font-style: italic; }
+        .ai-actions { display: flex; gap: 0.6rem; justify-content: flex-end; flex-wrap: wrap; }
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(167,139,250,0.1);
+            border: 1px solid rgba(167,139,250,0.25);
+            color: var(--accent2);
+            padding: 0.25rem 0.7rem;
+            border-radius: 2rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+        .ai-spinner { animation: spin 1s linear infinite; display: inline-block; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-    #modulos-section p {
-      margin-bottom: 10px;
-      color: #333;
-    }
+        /* ─── ALERT ─── */
+        .toast {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 0.7rem;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            z-index: 9999;
+            font-size: 0.88rem;
+            min-width: 220px;
+            animation: toastIn 0.3s ease;
+            display: none;
+        }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: none; opacity: 1; } }
+        .toast.success { border-color: rgba(52,211,153,0.4); }
+        .toast.success i { color: var(--accent3); }
+        .toast.error { border-color: rgba(248,113,113,0.4); }
+        .toast.error i { color: var(--danger); }
 
-    #modulos-section img {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-  </style>
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text3);
+        }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.4; }
+        .empty-state p { font-size: 0.9rem; }
+
+        /* ─── SECTIONS (tab views) ─── */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* ─── MOBILE SIDEBAR ─── */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            z-index: 200;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 40px; height: 40px;
+            border-radius: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .mobile-toggle { display: flex; }
+            .topbar { padding-left: 4rem; }
+            .content { padding: 1rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .table-controls { flex-direction: column; align-items: flex-start; }
+            .search-wrap { max-width: 100%; }
+            .modal-body, .modal-footer { padding: 1rem 1.2rem; }
+        }
+
+        /* small utility */
+        .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .dot-yellow { background: var(--warning); }
+        .dot-blue { background: var(--accent); }
+        .dot-green { background: var(--accent3); }
+        .dot-purple { background: var(--accent2); }
+
+        .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+        .tag {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 0.4rem;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.72rem;
+            color: var(--text2);
+        }
+
+        /* Pill category */
+        .category-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+            color: var(--text2);
+        }
+
+        /* Section header */
+        .page-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.3rem; }
+        .page-sub { color: var(--text3); font-size: 0.85rem; margin-bottom: 1.5rem; }
+
+        /* Progress bar for stats */
+        .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+        .progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+
+        /* Grid stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-tile {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 0.8rem;
+            padding: 1.1rem;
+        }
+        .stat-tile-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; line-height: 1; }
+        .stat-tile-label { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
+        .stat-tile-bar { margin-top: 8px; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+        /* Assigned to selector */
+        .assigned-selector { display: flex; gap: 0.5rem; }
+        .assigned-opt {
+            flex: 1;
+            padding: 0.55rem;
+            border: 1px solid var(--border);
+            border-radius: 0.6rem;
+            background: var(--bg);
+            color: var(--text2);
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.82rem;
+            transition: all 0.2s;
+        }
+        .assigned-opt.selected-yo { border-color: var(--accent); color: var(--accent); background: rgba(79,142,247,0.08); }
+        .assigned-opt.selected-amigo { border-color: var(--accent2); color: var(--accent2); background: rgba(167,139,250,0.08); }
+        .assigned-opt.selected-ambos { border-color: var(--accent3); color: var(--accent3); background: rgba(52,211,153,0.08); }
+    </style>
 </head>
 <body>
 
-  <div class="container">
+<!-- Mobile toggle -->
+<button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    <i class="fas fa-bars"></i>
+</button>
 
-    <!--  INICIO MÓDULO 1: MENÚ DEL RESTAURANTE -->
-    <h2>📋 Menú del Restaurante</h2>
-    <ul id="menu-list"></ul>
-    <!--  FIN MÓDULO 1 -->
+<div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <h1>Maps<span>CRM</span></h1>
+            <p>Gestión de prospectos</p>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Principal</div>
+            <div class="nav-item active" data-section="negocios" onclick="switchSection('negocios', this)">
+                <i class="fas fa-store"></i> Negocios
+            </div>
+            <div class="nav-item" data-section="agregar" onclick="switchSection('agregar', this)">
+                <i class="fas fa-plus-circle"></i> Agregar / Editar
+            </div>
+            <div class="nav-section">Herramientas</div>
+            <div class="nav-item" data-section="ia" onclick="switchSection('ia', this)">
+                <i class="fas fa-robot"></i> IA — Mensaje de Contacto
+            </div>
+            <div class="nav-item" data-section="sync" onclick="switchSection('sync', this)">
+                <i class="fas fa-sync-alt"></i> Sync con Amigo
+            </div>
+        </nav>
+        <div class="sidebar-stats">
+            <div class="sidebar-stat">
+                <span>Total negocios</span>
+                <span class="val val-blue" id="sb-total">0</span>
+            </div>
+            <div class="sidebar-stat">
+                <span>Cerrados</span>
+                <span class="val val-purple" id="sb-cerrados">0</span>
+            </div>
+            <div class="sidebar-stat">
+                <span>Interesados</span>
+                <span class="val val-green" id="sb-interesados">0</span>
+            </div>
+            <div class="sidebar-stat">
+                <span>Pendientes</span>
+                <span class="val val-yellow" id="sb-pendientes">0</span>
+            </div>
+        </div>
+    </aside>
 
-    <!--  INICIO MÓDULO 2: CARRITO DE COMPRAS -->
-    <div id="carrito">
-      <h2>🛒 Tu Pedido</h2>
-      <ul id="carrito-list"></ul>
-      <p><strong>Total: RD$<span id="total">0</span></strong></p>
-      <button class="pagar-btn" onclick="pagar()">💳 Pagar ahora</button>
-    </div>
-    <!--  FIN MÓDULO 2 -->
+    <!-- MAIN -->
+    <main class="main">
+        <div class="topbar">
+            <div class="topbar-left">
+                <h2 id="topbar-title">Negocios</h2>
+                <p id="topbar-sub">Todos tus prospectos de Google Maps</p>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn btn-secondary btn-sm" onclick="switchSection('agregar')">
+                    <i class="fas fa-plus"></i> Nuevo
+                </button>
+            </div>
+        </div>
 
-    <!--  INICIO MÓDULO 3: MENSAJE DE CONFIRMACIÓN -->
-    <div id="mensaje"></div>
-    <!--  FIN MÓDULO 3 -->
+        <div class="content">
 
-    <!--  INICIO MÓDULO 4: SECCIÓN DE VISUALIZACIÓN DE MÓDULOS -->
-    <div id="modulos-section">
-      <h2> Módulos de la App</h2>
-      <p>A continuación puedes ver las capturas de cada módulo con su nombre y función:</p>
+            <!-- ═══ SECCIÓN: NEGOCIOS ═══ -->
+            <section id="sec-negocios" class="section active">
+                <div class="stats-grid">
+                    <div class="stat-tile">
+                        <div class="stat-tile-num val-blue" id="st-total">0</div>
+                        <div class="stat-tile-label">Total negocios</div>
+                        <div class="stat-tile-bar"><div class="progress-bar"><div class="progress-fill" style="background:var(--accent);width:100%"></div></div></div>
+                    </div>
+                    <div class="stat-tile">
+                        <div class="stat-tile-num val-yellow" id="st-pendientes">0</div>
+                        <div class="stat-tile-label">Pendientes</div>
+                        <div class="stat-tile-bar"><div class="progress-bar"><div id="pb-pendientes" class="progress-fill" style="background:var(--warning);width:0%"></div></div></div>
+                    </div>
+                    <div class="stat-tile">
+                        <div class="stat-tile-num" style="color:var(--accent)" id="st-contactados">0</div>
+                        <div class="stat-tile-label">Contactados</div>
+                        <div class="stat-tile-bar"><div class="progress-bar"><div id="pb-contactados" class="progress-fill" style="background:var(--accent);width:0%"></div></div></div>
+                    </div>
+                    <div class="stat-tile">
+                        <div class="stat-tile-num val-green" id="st-interesados">0</div>
+                        <div class="stat-tile-label">Interesados</div>
+                        <div class="stat-tile-bar"><div class="progress-bar"><div id="pb-interesados" class="progress-fill" style="background:var(--accent3);width:0%"></div></div></div>
+                    </div>
+                    <div class="stat-tile">
+                        <div class="stat-tile-num val-purple" id="st-cerrados">0</div>
+                        <div class="stat-tile-label">Cerrados / Clientes</div>
+                        <div class="stat-tile-bar"><div class="progress-bar"><div id="pb-cerrados" class="progress-fill" style="background:var(--accent2);width:0%"></div></div></div>
+                    </div>
+                    <div class="stat-tile">
+                        <div class="stat-tile-num val-yellow" id="st-avg">0.0</div>
+                        <div class="stat-tile-label">⭐ Valoración media</div>
+                    </div>
+                </div>
 
-      <div>
-        <h3> Módulo 1: Menú del Restaurante</h3>
-        <p>Este módulo muestra los platos disponibles y permite agregarlos al carrito.</p>
-        <img src="https://i.imgur.com/XWV7ced.png" alt="Módulo 1">
-      </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-table-list"></i> Listado de Negocios</h3>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button class="btn btn-success btn-sm" onclick="exportToCSV()"><i class="fas fa-download"></i> CSV</button>
+                            <button class="btn btn-secondary btn-sm" id="importBtn"><i class="fas fa-upload"></i> Importar</button>
+                        </div>
+                    </div>
+                    <div class="table-controls">
+                        <div class="search-wrap">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Buscar por nombre, categoría...">
+                        </div>
+                        <div class="filter-pills">
+                            <button class="filter-pill active" data-filter="all">Todos</button>
+                            <button class="filter-pill" data-filter="pendiente"><span class="dot dot-yellow"></span> Pendiente</button>
+                            <button class="filter-pill" data-filter="contactado"><span class="dot dot-blue"></span> Contactado</button>
+                            <button class="filter-pill" data-filter="interesado"><span class="dot dot-green"></span> Interesado</button>
+                            <button class="filter-pill" data-filter="cerrado"><span class="dot dot-purple"></span> Cerrado</button>
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th data-sort="name">Nombre <i class="fas fa-sort fa-xs"></i></th>
+                                    <th>Mapas</th>
+                                    <th>IG</th>
+                                    <th>Contacto</th>
+                                    <th data-sort="category">Categoría</th>
+                                    <th data-sort="status">Estado</th>
+                                    <th data-sort="rating">Val.</th>
+                                    <th>Asignado</th>
+                                    <th data-sort="nextContact">Próx. Contacto</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
 
-      <div>
-        <h3> Módulo 2: Carrito de Compras</h3>
-        <p>Este módulo muestra los productos seleccionados y el total acumulado.</p>
-        <img src="https://i.imgur.com/inSZNPZ.png" alt="Módulo 2">
-      </div>
+            <!-- ═══ SECCIÓN: AGREGAR/EDITAR ═══ -->
+            <section id="sec-agregar" class="section">
+                <div class="page-title" id="formTitle">Registrar Negocio</div>
+                <div class="page-sub">Rellena los datos del negocio encontrado en Google Maps</div>
 
-      <div>
-        <h3> Módulo 3: Pago Simulado</h3>
-        <p>Este módulo simula el pago y muestra un mensaje de confirmación.</p>
-        <img src="https://i.imgur.com/B9pVEV8.png" alt="Módulo 3">
-      </div>
-    </div>
-    <!--  FIN MÓDULO 4 -->
+                <div class="card">
+                    <form id="businessForm">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label><i class="fas fa-building"></i> Nombre del Negocio *</label>
+                                <input type="text" id="name" required placeholder="Ej: Restaurante El Sol">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-map-marker-alt"></i> Enlace de Google Maps *</label>
+                                <input type="url" id="mapsLink" required placeholder="https://maps.app.goo.gl/...">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fab fa-instagram"></i> Instagram</label>
+                                <input type="text" id="instagramLink" placeholder="https://instagram.com/negocio o usuario">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-phone"></i> Teléfono</label>
+                                <input type="text" id="phone" placeholder="+1 809 123 4567">
+                                <small class="help-text">Incluye código de país para WhatsApp</small>
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-envelope"></i> Correos Electrónicos</label>
+                                <div class="emails-container" id="emailsContainer"></div>
+                                <button type="button" class="btn btn-secondary btn-sm" id="addEmailBtn" style="margin-top:0.4rem;">
+                                    <i class="fas fa-plus"></i> Agregar otro correo
+                                </button>
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-tag"></i> Categoría</label>
+                                <input type="text" id="category" placeholder="Restaurante, Tienda, Salón...">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-signal"></i> Estado</label>
+                                <select id="status">
+                                    <option value="pendiente">📌 Pendiente</option>
+                                    <option value="contactado">📞 Contactado</option>
+                                    <option value="interesado">⭐ Interesado</option>
+                                    <option value="cerrado">✅ Cerrado / Cliente</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-user"></i> Asignado a</label>
+                                <div class="assigned-selector" id="assignedSelector">
+                                    <div class="assigned-opt" data-val="yo" onclick="selectAssigned('yo')">👤 Yo</div>
+                                    <div class="assigned-opt" data-val="amigo" onclick="selectAssigned('amigo')">🤝 Amigo</div>
+                                    <div class="assigned-opt" data-val="ambos" onclick="selectAssigned('ambos')">👥 Ambos</div>
+                                </div>
+                                <input type="hidden" id="assignedTo" value="yo">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-star"></i> Valoración</label>
+                                <div class="rating-stars" id="ratingStars">
+                                    <span class="star" data-value="1">★</span>
+                                    <span class="star" data-value="2">★</span>
+                                    <span class="star" data-value="3">★</span>
+                                    <span class="star" data-value="4">★</span>
+                                    <span class="star" data-value="5">★</span>
+                                </div>
+                                <input type="hidden" id="rating" value="0">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-calendar-alt"></i> Próximo Contacto</label>
+                                <input type="date" id="nextContact">
+                            </div>
+                            <div class="input-group full-width">
+                                <label><i class="fas fa-sticky-note"></i> Notas</label>
+                                <textarea id="notes" placeholder="Observaciones, dueño, horario, etc."></textarea>
+                            </div>
+                        </div>
+                        <hr class="divider">
+                        <div style="display:flex;gap:0.8rem;justify-content:flex-end;flex-wrap:wrap;">
+                            <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none;">
+                                <i class="fas fa-times"></i> Cancelar edición
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="saveBtn">
+                                <i class="fas fa-save"></i> Guardar Negocio
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
 
-  </div>
+            <!-- ═══ SECCIÓN: IA ═══ -->
+            <section id="sec-ia" class="section">
+                <div class="page-title">🤖 Generador de Mensajes con IA</div>
+                <div class="page-sub">Genera textos de contacto personalizados para cada negocio usando inteligencia artificial</div>
 
-  <!--  Botón flotante -->
-  <button id="ver-modulos-btn" onclick="mostrarModulos()">Ver módulos</button>
+                <div class="card ai-card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-magic"></i> Mensaje de Contacto IA</h3>
+                        <span class="ai-badge"><i class="fas fa-robot"></i> Claude AI</span>
+                    </div>
+                    <div class="ai-form">
+                        <div class="ai-fields">
+                            <div class="input-group">
+                                <label><i class="fas fa-store"></i> Nombre del Negocio</label>
+                                <input type="text" id="ai-business-name" placeholder="Ej: Restaurante El Sol">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-tag"></i> Categoría / Sector</label>
+                                <input type="text" id="ai-category" placeholder="Ej: Restaurante, Salón de belleza...">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-map-marker-alt"></i> Ciudad / Zona</label>
+                                <input type="text" id="ai-location" placeholder="Ej: Santo Domingo, Santiago...">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-paper-plane"></i> Canal de contacto</label>
+                                <select id="ai-channel">
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="email">Email / Correo</option>
+                                    <option value="instagram">Instagram DM</option>
+                                    <option value="llamada">Llamada telefónica</option>
+                                    <option value="presencial">Visita presencial</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-user-tie"></i> Tu nombre / empresa</label>
+                                <input type="text" id="ai-my-name" placeholder="Ej: Carlos de WebDev RD">
+                            </div>
+                            <div class="input-group">
+                                <label><i class="fas fa-lightbulb"></i> Tono del mensaje</label>
+                                <select id="ai-tone">
+                                    <option value="profesional">Profesional y formal</option>
+                                    <option value="amigable">Amigable y cercano</option>
+                                    <option value="directo">Directo al punto</option>
+                                    <option value="persuasivo">Persuasivo y vendedor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-info-circle"></i> Detalles extra (opcional)</label>
+                            <textarea id="ai-extra" placeholder="Ej: El negocio no tiene web actualmente, tiene buenas reseñas en Maps, su Instagram tiene 2k seguidores..."></textarea>
+                        </div>
+                        <div class="ai-actions">
+                            <button class="btn btn-secondary" onclick="loadBusinessIntoAI()">
+                                <i class="fas fa-database"></i> Cargar desde negocio guardado
+                            </button>
+                            <button class="btn btn-purple" onclick="generateAIMessage()" id="ai-generate-btn">
+                                <i class="fas fa-magic"></i> Generar Mensaje
+                            </button>
+                        </div>
+                        <div id="ai-output" class="ai-output"></div>
+                        <div id="ai-copy-row" style="display:none; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+                            <button class="btn btn-secondary btn-sm" onclick="copyAIMessage()">
+                                <i class="fas fa-copy"></i> Copiar mensaje
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="saveAIMessageToNotes()">
+                                <i class="fas fa-save"></i> Guardar en notas del negocio
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-  <script>
-    //  INICIO MÓDULO 1: MENÚ DEL RESTAURANTE
-    const menu = {
-      "Hamburguesa Clásica": 250,
-      "Pizza pepperoni": 400,
-      "Ensalada": 200,
-      "Refresco Coca-Cola": 100
-    };
+                <!-- Selector de negocio modal -->
+                <div id="businessPickerModal" class="modal-overlay">
+                    <div class="modal" style="max-width:480px;">
+                        <div class="modal-header">
+                            <div>
+                                <h2>Seleccionar negocio</h2>
+                                <div class="sub">Cargar datos del negocio para la IA</div>
+                            </div>
+                            <button class="modal-close" onclick="closeBusinessPicker()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body" id="businessPickerList" style="max-height:400px;overflow-y:auto;"></div>
+                    </div>
+                </div>
+            </section>
 
-    const menuList = document.getElementById("menu-list");
+            <!-- ═══ SECCIÓN: SYNC ═══ -->
+            <section id="sec-sync" class="section">
+                <div class="page-title">🔄 Sync con tu Amigo</div>
+                <div class="page-sub">Exporta tu lista y fusiona la de tu amigo fácilmente. Los IDs son únicos para evitar duplicados.</div>
 
-    for (let plato in menu) {
-      let item = document.createElement("li");
-      item.innerHTML = `
-        <span>${plato}: RD$${menu[plato]}</span>
-        <button onclick="agregarAlCarrito('${plato}', ${menu[plato]})">Agregar</button>
-      `;
-      menuList.appendChild(item);
-    }
-    //  FIN MÓDULO 1
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1rem;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-upload"></i> Exportar mis datos</h3>
+                        </div>
+                        <p style="color:var(--text2);font-size:0.88rem;margin-bottom:1rem;line-height:1.6;">
+                            Descarga un archivo JSON con todos tus negocios y envíaselo a tu amigo para que los fusione en su app.
+                        </p>
+                        <button class="btn btn-success" onclick="backupData()">
+                            <i class="fas fa-download"></i> Descargar JSON
+                        </button>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-download"></i> Fusionar datos de amigo</h3>
+                        </div>
+                        <p style="color:var(--text2);font-size:0.88rem;margin-bottom:1rem;line-height:1.6;">
+                            Carga el JSON que te envió tu amigo. Los negocios nuevos se agregan y los existentes (mismo ID) se actualizan.
+                        </p>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <input type="file" id="jsonMergeFile" accept=".json" style="display:none;" onchange="mergeJSON(this.files[0])">
+                            <button class="btn btn-primary" onclick="document.getElementById('jsonMergeFile').click()">
+                                <i class="fas fa-code-merge"></i> Fusionar JSON
+                            </button>
+                            <input type="file" id="csvFile" accept=".csv" style="display:none;" onchange="importCSV(this.files[0])">
+                            <button class="btn btn-secondary" onclick="document.getElementById('csvFile').click()">
+                                <i class="fas fa-file-csv"></i> Importar CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-trash-alt"></i> Zona de peligro</h3>
+                        </div>
+                        <p style="color:var(--text2);font-size:0.88rem;margin-bottom:1rem;line-height:1.6;">
+                            Eliminar todos los negocios guardados. Esta acción no se puede deshacer. Haz un backup antes.
+                        </p>
+                        <button class="btn btn-danger" onclick="clearAll()">
+                            <i class="fas fa-exclamation-triangle"></i> Borrar todo
+                        </button>
+                    </div>
+                </div>
 
-    //  INICIO MÓDULO 2: CARRITO DE COMPRAS
-    const carritoList = document.getElementById("carrito-list");
-    const totalSpan = document.getElementById("total");
-    const mensaje = document.getElementById("mensaje");
-
-    let carrito = [];
-    let total = 0;
-
-    function agregarAlCarrito(plato, precio) {
-      carrito.push({ plato, precio });
-      total += precio;
-      actualizarCarrito();
-      mensaje.style.display = "none";
-    }
-
-    function actualizarCarrito() {
-      carritoList.innerHTML = "";
-      carrito.forEach((item) => {
-        let li = document.createElement("li");
-        li.innerHTML = `<span>${item.plato}: RD$${item.precio}</span>`;
-        carritoList.appendChild(li);
-      });
-      totalSpan.textContent = total;
-    }
-    // FIN MÓDULO 2
-
-    // INICIO MÓDULO 3: PAGO DE CARRITO
-    function pagar() {
-      if (carrito.length === 0) {
-        mostrarMensaje("Tu carrito está vacío. Agrega algo antes de pagar.", "#ffccbc", "#bf360c");
-      } else {
-        mostrarMensaje("¡Gracias por tu compra! Total pagado: RD$" + total, "#dcedc8", "#33691e");
-        carrito = [];
-        total = 0;
-        actualizarCarrito();
-      }
-    }
-
-    function mostrarMensaje(texto, fondo, color) {
-      mensaje.textContent = texto;
-      mensaje.style.backgroundColor = fondo;
-      mensaje.style.color = color;
-      mensaje.style.display = "block";
-    }
-    //  FIN MÓDULO 3
-
-    //  INICIO MÓDULO 4: MOSTRAR SECCIÓN DE MÓDULOS
-    function mostrarModulos() {
-      const seccion = document.getElementById("modulos-section");
-      seccion.style.display = seccion.style.display === "none" ? "block" : "none";
-    }
-    //  FIN MÓDULO 4
-  </script>
-
-<!-- 🔹 Contenedor para imagen ampliada -->
-<div id="imagen-ampliada" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
-  <img id="imagen-grande" src="" alt="Imagen ampliada" style="max-width:90%; max-height:90%; border-radius:10px; box-shadow:0 0 20px rgba(0,0,0,0.5); cursor:pointer;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-info-circle"></i> Cómo funciona el Sync</h3>
+                    </div>
+                    <ol style="color:var(--text2);font-size:0.88rem;line-height:2;padding-left:1.2rem;">
+                        <li>Tú agregas negocios → pulsas <strong style="color:var(--text)">Descargar JSON</strong></li>
+                        <li>Le envías el archivo por WhatsApp/email a tu amigo</li>
+                        <li>Tu amigo pulsa <strong style="color:var(--text)">Fusionar JSON</strong> y selecciona tu archivo</li>
+                        <li>Los negocios nuevos se añaden, los ya existentes se actualizan automáticamente</li>
+                        <li>No hay duplicados gracias al ID único de cada negocio</li>
+                    </ol>
+                </div>
+            </section>
+        </div>
+    </main>
 </div>
 
+<!-- ═══ MODAL DETALLE NEGOCIO ═══ -->
+<div id="detailModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <div>
+                <h2 id="detailName">—</h2>
+                <div class="sub" id="detailSubtitle">—</div>
+            </div>
+            <button class="modal-close" onclick="closeDetailModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" id="detailBody"></div>
+        <div class="modal-footer" id="detailFooter"></div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"><i id="toast-icon" class="fas fa-check-circle"></i> <span id="toast-msg"></span></div>
+
 <script>
-  // Mostrar imagen ampliada al hacer clic
-  document.querySelectorAll('#modulos-section img').forEach(img => {
-    img.addEventListener('click', () => {
-      const ampliada = document.getElementById('imagen-ampliada');
-      const imagenGrande = document.getElementById('imagen-grande');
-      imagenGrande.src = img.src;
-      ampliada.style.display = 'flex';
+// ══════════════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════════════
+const STORAGE_KEY = 'mapscrm_v2';
+function getBusinesses() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; } }
+function saveBusinesses(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); renderTable(); updateStats(); }
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let editingId = null;
+let currentFilter = 'all';
+let currentSearch = '';
+let currentSort = { col: 'name', dir: 'asc' };
+let currentDetailBusiness = null;
+let currentAssigned = 'yo';
+let lastAIBusinessId = null;
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+const sectionMeta = {
+    negocios: { title: 'Negocios', sub: 'Todos tus prospectos de Google Maps' },
+    agregar:  { title: 'Registrar / Editar', sub: 'Añade un nuevo negocio prospecto' },
+    ia:       { title: 'IA — Mensaje de Contacto', sub: 'Genera mensajes personalizados con inteligencia artificial' },
+    sync:     { title: 'Sync con Amigo', sub: 'Comparte y fusiona datos fácilmente' }
+};
+function switchSection(name, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('sec-' + name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    if (el) el.classList.add('active');
+    else document.querySelector(`[data-section="${name}"]`)?.classList.add('active');
+    const m = sectionMeta[name];
+    document.getElementById('topbar-title').textContent = m.title;
+    document.getElementById('topbar-sub').textContent = m.sub;
+    document.querySelector('.sidebar')?.classList.remove('open');
+}
+
+// ══════════════════════════════════════════════
+//  ASSIGNED
+// ══════════════════════════════════════════════
+function selectAssigned(val) {
+    currentAssigned = val;
+    document.getElementById('assignedTo').value = val;
+    document.querySelectorAll('.assigned-opt').forEach(o => {
+        o.className = 'assigned-opt';
+        if (o.dataset.val === val) o.classList.add('selected-' + val);
     });
-  });
+}
 
-  // Cerrar imagen ampliada al hacer clic sobre ella
-  document.getElementById('imagen-ampliada').addEventListener('click', () => {
-    document.getElementById('imagen-ampliada').style.display = 'none';
-  });
+// ══════════════════════════════════════════════
+//  FORM HELPERS
+// ══════════════════════════════════════════════
+function getEmailsFromForm() {
+    return [...document.querySelectorAll('.email-input')]
+        .map(i => i.value.trim()).filter(Boolean);
+}
+function loadEmailsToForm(emails) {
+    const c = document.getElementById('emailsContainer');
+    c.innerHTML = '';
+    const list = (emails && emails.length) ? emails : [''];
+    list.forEach((email, idx) => {
+        const d = document.createElement('div');
+        d.className = 'email-item';
+        d.innerHTML = `<input type="email" class="email-input" value="${escapeHtml(email)}" placeholder="contacto@negocio.com">
+            <button type="button" class="remove-email" onclick="removeEmailRow(this)">
+                <i class="fas fa-times"></i>
+            </button>`;
+        if (idx === 0 && list.length === 1 && !email) d.querySelector('.remove-email').style.display = 'none';
+        c.appendChild(d);
+    });
+}
+function removeEmailRow(btn) {
+    const items = document.querySelectorAll('.email-item');
+    if (items.length <= 1) return;
+    btn.closest('.email-item').remove();
+}
+function updateRemoveBtns() {
+    const items = document.querySelectorAll('.email-item');
+    items.forEach(i => i.querySelector('.remove-email').style.display = items.length > 1 ? 'flex' : 'none');
+}
+
+// ══════════════════════════════════════════════
+//  CRUD
+// ══════════════════════════════════════════════
+function addBusiness(data) {
+    const arr = getBusinesses();
+    arr.push({ id: Date.now(), ...data, createdAt: new Date().toISOString() });
+    saveBusinesses(arr);
+    showToast('✅ Negocio guardado correctamente', 'success');
+}
+function updateBusiness(id, data) {
+    const arr = getBusinesses();
+    const i = arr.findIndex(b => b.id === id);
+    if (i !== -1) { arr[i] = { ...arr[i], ...data }; saveBusinesses(arr); showToast('✏️ Negocio actualizado', 'success'); }
+}
+function deleteBusiness(id) {
+    if (!confirm('¿Eliminar este negocio?')) return;
+    saveBusinesses(getBusinesses().filter(b => b.id !== id));
+    if (editingId === id) cancelEdit();
+    closeDetailModal();
+    showToast('🗑️ Negocio eliminado', 'success');
+}
+function duplicateBusiness(id) {
+    const b = getBusinesses().find(b => b.id === id);
+    if (!b) return;
+    const { id: _, createdAt: __, ...copy } = b;
+    addBusiness({ ...copy, name: copy.name + ' (Copia)' });
+    showToast('📋 Negocio duplicado', 'success');
+}
+
+// ══════════════════════════════════════════════
+//  FORM SUBMIT
+// ══════════════════════════════════════════════
+function handleFormSubmit(e) {
+    e.preventDefault();
+    const data = {
+        name:          document.getElementById('name').value.trim(),
+        mapsLink:      document.getElementById('mapsLink').value.trim(),
+        instagramLink: document.getElementById('instagramLink').value.trim(),
+        phone:         document.getElementById('phone').value.trim(),
+        emails:        getEmailsFromForm(),
+        category:      document.getElementById('category').value.trim(),
+        status:        document.getElementById('status').value,
+        assignedTo:    document.getElementById('assignedTo').value || 'yo',
+        rating:        parseInt(document.getElementById('rating').value) || 0,
+        nextContact:   document.getElementById('nextContact').value,
+        notes:         document.getElementById('notes').value.trim()
+    };
+    if (!data.name || !data.mapsLink) { showToast('⚠️ Nombre y Maps son obligatorios', 'error'); return; }
+    if (editingId !== null) { updateBusiness(editingId, data); cancelEdit(); }
+    else { addBusiness(data); cancelEdit(); }
+    switchSection('negocios');
+}
+function cancelEdit() {
+    editingId = null;
+    document.getElementById('businessForm').reset();
+    document.getElementById('status').value = 'pendiente';
+    document.getElementById('rating').value = '0';
+    loadEmailsToForm([]);
+    updateStarDisplay(0);
+    selectAssigned('yo');
+    document.getElementById('formTitle').textContent = 'Registrar Negocio';
+    document.getElementById('saveBtn').innerHTML = '<i class="fas fa-save"></i> Guardar Negocio';
+    document.getElementById('cancelBtn').style.display = 'none';
+}
+function editBusiness(id) {
+    const b = getBusinesses().find(b => b.id === id);
+    if (!b) return;
+    closeDetailModal();
+    switchSection('agregar');
+    setTimeout(() => {
+        document.getElementById('name').value          = b.name;
+        document.getElementById('mapsLink').value      = b.mapsLink;
+        document.getElementById('instagramLink').value = b.instagramLink || '';
+        document.getElementById('phone').value         = b.phone || '';
+        loadEmailsToForm(b.emails || []);
+        document.getElementById('category').value      = b.category || '';
+        document.getElementById('status').value        = b.status;
+        selectAssigned(b.assignedTo || 'yo');
+        document.getElementById('rating').value        = b.rating || 0;
+        document.getElementById('nextContact').value   = b.nextContact || '';
+        document.getElementById('notes').value         = b.notes || '';
+        updateStarDisplay(b.rating || 0);
+        editingId = id;
+        document.getElementById('formTitle').textContent = 'Editando: ' + b.name;
+        document.getElementById('saveBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar';
+        document.getElementById('cancelBtn').style.display = 'flex';
+        document.querySelector('#sec-agregar').scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+}
+
+// ══════════════════════════════════════════════
+//  STARS
+// ══════════════════════════════════════════════
+function initStarRating() {
+    const stars = document.querySelectorAll('#ratingStars .star');
+    const inp = document.getElementById('rating');
+    stars.forEach(s => {
+        s.addEventListener('click', function () { inp.value = this.dataset.value; updateStarDisplay(+this.dataset.value); });
+        s.addEventListener('mouseenter', function () {
+            const v = +this.dataset.value;
+            stars.forEach((st, i) => st.style.color = i < v ? 'var(--warning)' : 'var(--border)');
+        });
+    });
+    document.getElementById('ratingStars').addEventListener('mouseleave', () => updateStarDisplay(+inp.value || 0));
+}
+function updateStarDisplay(r) {
+    document.querySelectorAll('#ratingStars .star').forEach((s, i) => {
+        s.style.color = '';
+        i < r ? s.classList.add('active') : s.classList.remove('active');
+    });
+}
+function renderStars(r) {
+    return [...Array(5)].map((_, i) => `<span class="star ${i < r ? 'active' : ''}">★</span>`).join('');
+}
+
+// ══════════════════════════════════════════════
+//  TABLE RENDER
+// ══════════════════════════════════════════════
+function getFiltered() {
+    let arr = getBusinesses();
+    if (currentFilter !== 'all') arr = arr.filter(b => b.status === currentFilter);
+    if (currentSearch) {
+        const q = currentSearch.toLowerCase();
+        arr = arr.filter(b =>
+            b.name.toLowerCase().includes(q) ||
+            (b.category||'').toLowerCase().includes(q) ||
+            (b.phone||'').includes(q) ||
+            (b.notes||'').toLowerCase().includes(q)
+        );
+    }
+    arr.sort((a, b) => {
+        let av = a[currentSort.col] || '', bv = b[currentSort.col] || '';
+        if (currentSort.col === 'rating') { av = +av || 0; bv = +bv || 0; }
+        if (av < bv) return currentSort.dir === 'asc' ? -1 : 1;
+        if (av > bv) return currentSort.dir === 'asc' ? 1 : -1;
+        return 0;
+    });
+    return arr;
+}
+function renderTable() {
+    const arr = getFiltered();
+    const tbody = document.getElementById('tableBody');
+    if (!arr.length) {
+        tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state">
+            <i class="fas fa-map-marked-alt"></i>
+            <p>No hay negocios guardados aún.<br>Ve a <strong>Agregar</strong> para registrar el primero.</p>
+        </div></td></tr>`;
+        return;
+    }
+    tbody.innerHTML = arr.map(b => {
+        const assigned = b.assignedTo || 'yo';
+        const assignedLabel = assigned === 'amigo' ? '🤝 Amigo' : assigned === 'ambos' ? '👥 Ambos' : '👤 Yo';
+        const assignedClass = 'badge badge-' + assigned;
+        return `<tr data-id="${b.id}">
+            <td><strong>${escapeHtml(b.name)}</strong></td>
+            <td><a href="${escapeHtml(b.mapsLink)}" target="_blank" onclick="event.stopPropagation()" class="action-btn ab-maps"><i class="fas fa-map-marker-alt"></i></a></td>
+            <td>${b.instagramLink ? `<a href="${escapeHtml(normalizeInstagram(b.instagramLink))}" target="_blank" onclick="event.stopPropagation()" class="action-btn ab-ig"><i class="fab fa-instagram"></i></a>` : '<span style="color:var(--text3)">—</span>'}</td>
+            <td style="font-size:0.8rem;">
+                ${b.phone ? `<div><i class="fas fa-phone" style="color:var(--accent3);font-size:0.7rem;"></i> ${escapeHtml(b.phone)}</div>` : ''}
+                ${b.emails && b.emails[0] ? `<div style="color:var(--text3)"><i class="fas fa-envelope" style="font-size:0.7rem;"></i> ${escapeHtml(b.emails[0])}</div>` : ''}
+                ${!b.phone && !(b.emails && b.emails[0]) ? '<span style="color:var(--text3)">—</span>' : ''}
+            </td>
+            <td>${b.category ? `<span class="category-pill"><i class="fas fa-tag" style="font-size:0.65rem;"></i> ${escapeHtml(b.category)}</span>` : '—'}</td>
+            <td><span class="badge badge-${b.status}">${getStatusDot(b.status)} ${getStatusText(b.status)}</span></td>
+            <td><div class="rating-display">${renderStars(b.rating||0)}</div></td>
+            <td><span class="${assignedClass}">${assignedLabel}</span></td>
+            <td style="font-size:0.8rem;color:var(--text3);">${b.nextContact ? formatDate(b.nextContact) : '—'}</td>
+            <td onclick="event.stopPropagation()">
+                <div class="row-actions">
+                    ${b.phone ? `<button class="action-btn ab-wa" onclick="openWhatsApp('${escapeHtml(b.phone)}')"><i class="fab fa-whatsapp"></i></button>` : ''}
+                    <button class="action-btn ab-ai" onclick="quickAI(${b.id})" title="Generar mensaje IA"><i class="fas fa-robot"></i></button>
+                    <button class="action-btn ab-edit" onclick="editBusiness(${b.id})"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn ab-del" onclick="deleteBusiness(${b.id})"><i class="fas fa-trash"></i></button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+    document.querySelectorAll('#tableBody tr[data-id]').forEach(row => {
+        row.addEventListener('click', () => {
+            const id = +row.dataset.id;
+            const b = getBusinesses().find(b => b.id === id);
+            if (b) showDetail(b);
+        });
+    });
+}
+
+// ══════════════════════════════════════════════
+//  DETAIL MODAL
+// ══════════════════════════════════════════════
+function showDetail(b) {
+    currentDetailBusiness = b;
+    document.getElementById('detailName').textContent = b.name;
+    document.getElementById('detailSubtitle').textContent = b.category || 'Sin categoría';
+    const assigned = b.assignedTo || 'yo';
+    const assignedLabel = assigned === 'amigo' ? '🤝 Amigo' : assigned === 'ambos' ? '👥 Ambos' : '👤 Yo';
+
+    const emailsHtml = b.emails && b.emails.length
+        ? b.emails.map(e => `<a href="mailto:${e}">${e}</a>`).join('<br>')
+        : '<em style="color:var(--text3)">No registrado</em>';
+
+    document.getElementById('detailBody').innerHTML = `
+        <div class="detail-row"><div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div><div><div class="detail-label">Google Maps</div><div class="detail-value"><a href="${escapeHtml(b.mapsLink)}" target="_blank"><i class="fas fa-external-link-alt"></i> Ver en Google Maps</a></div></div></div>
+        ${b.instagramLink ? `<div class="detail-row"><div class="detail-icon"><i class="fab fa-instagram"></i></div><div><div class="detail-label">Instagram</div><div class="detail-value"><a href="${escapeHtml(normalizeInstagram(b.instagramLink))}" target="_blank"><i class="fab fa-instagram"></i> Ver Instagram</a></div></div></div>` : ''}
+        <div class="detail-row"><div class="detail-icon"><i class="fas fa-phone"></i></div><div><div class="detail-label">Teléfono</div><div class="detail-value">${b.phone ? escapeHtml(b.phone) : '<em style="color:var(--text3)">No registrado</em>'}</div></div></div>
+        <div class="detail-row"><div class="detail-icon"><i class="fas fa-envelope"></i></div><div><div class="detail-label">Correos</div><div class="detail-value">${emailsHtml}</div></div></div>
+        <div class="detail-row"><div class="detail-icon"><i class="fas fa-signal"></i></div><div><div class="detail-label">Estado</div><div class="detail-value"><span class="badge badge-${b.status}">${getStatusText(b.status)}</span></div></div></div>
+        <div class="detail-row"><div class="detail-icon"><i class="fas fa-user"></i></div><div><div class="detail-label">Asignado a</div><div class="detail-value">${assignedLabel}</div></div></div>
+        <div class="detail-row"><div class="detail-icon"><i class="fas fa-star"></i></div><div><div class="detail-label">Valoración</div><div class="detail-value"><div class="rating-display" style="font-size:1.1rem;">${renderStars(b.rating||0)}</div></div></div></div>
+        ${b.nextContact ? `<div class="detail-row"><div class="detail-icon"><i class="fas fa-calendar"></i></div><div><div class="detail-label">Próximo Contacto</div><div class="detail-value">${formatDate(b.nextContact)}</div></div></div>` : ''}
+        ${b.notes ? `<div class="detail-row"><div class="detail-icon"><i class="fas fa-sticky-note"></i></div><div><div class="detail-label">Notas</div><div class="detail-value" style="white-space:pre-wrap;">${escapeHtml(b.notes)}</div></div></div>` : ''}
+        <div class="detail-row"><div class="detail-icon"><i class="fas fa-clock"></i></div><div><div class="detail-label">Registrado</div><div class="detail-value" style="color:var(--text3);font-size:0.82rem;">${b.createdAt ? new Date(b.createdAt).toLocaleString('es') : '—'}</div></div></div>
+    `;
+    document.getElementById('detailFooter').innerHTML = `
+        <button class="btn btn-warning btn-sm" onclick="editBusiness(${b.id})"><i class="fas fa-edit"></i> Editar</button>
+        ${b.phone ? `<button class="btn btn-success btn-sm" onclick="openWhatsApp('${escapeHtml(b.phone)}')"><i class="fab fa-whatsapp"></i> WhatsApp</button>` : ''}
+        <button class="btn btn-purple btn-sm" onclick="closeDetailModal();switchSection('ia');quickAI(${b.id})"><i class="fas fa-robot"></i> Generar mensaje IA</button>
+        <button class="btn btn-secondary btn-sm" onclick="duplicateBusiness(${b.id});closeDetailModal()"><i class="fas fa-copy"></i> Duplicar</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteBusiness(${b.id})"><i class="fas fa-trash"></i> Eliminar</button>
+    `;
+    document.getElementById('detailModal').classList.add('open');
+}
+function closeDetailModal() { document.getElementById('detailModal').classList.remove('open'); currentDetailBusiness = null; }
+
+// ══════════════════════════════════════════════
+//  STATS
+// ══════════════════════════════════════════════
+function updateStats() {
+    const arr = getBusinesses();
+    const total = arr.length;
+    const pend = arr.filter(b => b.status === 'pendiente').length;
+    const cont = arr.filter(b => b.status === 'contactado').length;
+    const inter = arr.filter(b => b.status === 'interesado').length;
+    const cerr = arr.filter(b => b.status === 'cerrado').length;
+    const ratings = arr.filter(b => b.rating > 0);
+    const avg = ratings.length ? (ratings.reduce((s,b) => s+b.rating,0)/ratings.length) : 0;
+
+    const set = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+    const pct = (n) => total ? Math.round(n/total*100)+'%' : '0%';
+
+    set('st-total', total); set('st-pendientes', pend); set('st-contactados', cont);
+    set('st-interesados', inter); set('st-cerrados', cerr); set('st-avg', avg.toFixed(1));
+    set('sb-total', total); set('sb-cerrados', cerr); set('sb-interesados', inter); set('sb-pendientes', pend);
+
+    const setPb = (id, n) => { const el = document.getElementById(id); if(el) el.style.width = pct(n); };
+    setPb('pb-pendientes', pend); setPb('pb-contactados', cont); setPb('pb-interesados', inter); setPb('pb-cerrados', cerr);
+}
+
+// ══════════════════════════════════════════════
+//  WHATSAPP
+// ══════════════════════════════════════════════
+function openWhatsApp(phone) {
+    if (!phone) { showToast('⚠️ Sin número registrado', 'error'); return; }
+    const clean = phone.replace(/[^0-9]/g, '');
+    window.open(`https://wa.me/${clean}`, '_blank');
+}
+
+// ══════════════════════════════════════════════
+//  INSTAGRAM URL FIX
+// ══════════════════════════════════════════════
+function normalizeInstagram(url) {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    if (url.startsWith('@')) url = url.substring(1);
+    return 'https://instagram.com/' + url;
+}
+
+// ══════════════════════════════════════════════
+//  EXPORT / IMPORT / BACKUP / MERGE
+// ══════════════════════════════════════════════
+function exportToCSV() {
+    const arr = getBusinesses();
+    if (!arr.length) { showToast('📭 No hay datos para exportar', 'error'); return; }
+    const headers = ['ID','Nombre','Maps Link','Instagram','Telefono','Emails','Categoria','Estado','Asignado','Valoracion','Proximo Contacto','Notas'];
+    const rows = arr.map(b => [
+        b.id,
+        csvField(b.name),
+        csvField(b.mapsLink||''),
+        csvField(b.instagramLink||''),
+        csvField(b.phone||''),
+        csvField((b.emails||[]).join(';')),
+        csvField(b.category||''),
+        csvField(getStatusText(b.status)),
+        csvField(b.assignedTo||'yo'),
+        b.rating||0,
+        b.nextContact||'',
+        csvField((b.notes||'').replace(/"/g,'""'))
+    ]);
+    const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    download('\uFEFF'+csv, `mapscrm_${today()}.csv`, 'text/csv');
+    showToast('📁 CSV exportado', 'success');
+}
+function csvField(v) { return `"${String(v).replace(/"/g,'""')}"`; }
+
+// ─── Proper CSV parser (handles quoted fields with commas inside) ───
+function parseCSVLine(line) {
+    const result = [];
+    let cur = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') {
+            if (inQuotes && line[i+1] === '"') { cur += '"'; i++; }
+            else inQuotes = !inQuotes;
+        } else if (c === ',' && !inQuotes) {
+            result.push(cur);
+            cur = '';
+        } else {
+            cur += c;
+        }
+    }
+    result.push(cur);
+    return result;
+}
+
+function importCSV(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const lines = e.target.result.split(/\r?\n/);
+        if (lines.length < 2) { showToast('CSV vacío o inválido', 'error'); return; }
+        const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+        const newB = [];
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            const vals = parseCSVLine(lines[i]);
+            const obj = {};
+            headers.forEach((h, idx) => { obj[h] = (vals[idx] || '').trim(); });
+            const name = obj['nombre'] || obj['name'];
+            if (!name) continue;
+            // Fix: phone field key variants
+            const phone = obj['telefono'] || obj['teléfono'] || obj['phone'] || '';
+            const emails = obj['emails'] ? obj['emails'].split(';').filter(Boolean) : [];
+            newB.push({
+                id: Date.now() + i,
+                name,
+                mapsLink: obj['maps link'] || obj['mapslink'] || '',
+                instagramLink: obj['instagram'] || '',
+                phone,
+                emails,
+                category: obj['categoría'] || obj['categoria'] || obj['category'] || '',
+                status: (obj['estado'] || obj['status'] || 'pendiente').toLowerCase(),
+                assignedTo: obj['asignado'] || obj['assignedto'] || 'yo',
+                rating: parseInt(obj['valoracion'] || obj['valoración'] || '0') || 0,
+                nextContact: obj['proximo contacto'] || obj['próximo contacto'] || obj['nextcontact'] || '',
+                notes: obj['notas'] || obj['notes'] || '',
+                createdAt: new Date().toISOString()
+            });
+        }
+        if (!newB.length) { showToast('No se encontraron negocios en el CSV', 'error'); return; }
+        saveBusinesses([...getBusinesses(), ...newB]);
+        showToast(`✅ Importados ${newB.length} negocios desde CSV`, 'success');
+    };
+    reader.readAsText(file, 'UTF-8');
+}
+
+function backupData() {
+    const data = JSON.stringify(getBusinesses(), null, 2);
+    download(data, `mapscrm_backup_${today()}.json`, 'application/json');
+    showToast('💾 JSON descargado', 'success');
+}
+
+function mergeJSON(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const incoming = JSON.parse(e.target.result);
+            if (!Array.isArray(incoming)) throw new Error('Formato inválido');
+            const existing = getBusinesses();
+            const existingIds = new Set(existing.map(b => b.id));
+            let added = 0, updated = 0;
+            const merged = [...existing];
+            incoming.forEach(nb => {
+                if (!nb.id || !nb.name) return;
+                const idx = merged.findIndex(b => b.id === nb.id);
+                if (idx === -1) { merged.push(nb); added++; }
+                else { merged[idx] = { ...merged[idx], ...nb }; updated++; }
+            });
+            saveBusinesses(merged);
+            showToast(`✅ +${added} nuevos, ${updated} actualizados`, 'success');
+        } catch (err) {
+            showToast('⚠️ Error al leer el JSON: ' + err.message, 'error');
+        }
+    };
+    reader.readAsText(file);
+}
+
+function clearAll() {
+    if (!confirm('⚠️ ¿Eliminar TODOS los negocios? Esta acción no se puede deshacer.\n\nAsegúrate de haber hecho un backup.')) return;
+    saveBusinesses([]);
+    cancelEdit();
+    showToast('🗑️ Todos los datos eliminados', 'success');
+}
+
+function download(content, filename, type) {
+    const blob = new Blob([content], { type });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+}
+function today() { return new Date().toISOString().split('T')[0]; }
+
+// ══════════════════════════════════════════════
+//  AI — GENERATE MESSAGE
+// ══════════════════════════════════════════════
+function quickAI(id) {
+    lastAIBusinessId = id;
+    const b = getBusinesses().find(b => b.id === id);
+    if (!b) return;
+    switchSection('ia');
+    document.getElementById('ai-business-name').value = b.name || '';
+    document.getElementById('ai-category').value = b.category || '';
+    document.getElementById('ai-location').value = '';
+    document.getElementById('ai-extra').value = b.notes ? 'Notas: ' + b.notes : '';
+}
+
+function loadBusinessIntoAI() {
+    const arr = getBusinesses();
+    if (!arr.length) { showToast('No hay negocios guardados', 'error'); return; }
+    const list = document.getElementById('businessPickerList');
+    list.innerHTML = arr.map(b => `
+        <div onclick="pickBusiness(${b.id})" style="padding:0.8rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+            <div style="font-weight:600;font-size:0.9rem;">${escapeHtml(b.name)}</div>
+            <div style="font-size:0.78rem;color:var(--text3);">${b.category||'Sin categoría'} · <span class="badge badge-${b.status}">${getStatusText(b.status)}</span></div>
+        </div>
+    `).join('');
+    document.getElementById('businessPickerModal').classList.add('open');
+}
+function pickBusiness(id) {
+    quickAI(id);
+    closeBusinessPicker();
+}
+function closeBusinessPicker() { document.getElementById('businessPickerModal').classList.remove('open'); }
+
+async function generateAIMessage() {
+    const name     = document.getElementById('ai-business-name').value.trim();
+    const category = document.getElementById('ai-category').value.trim();
+    const location = document.getElementById('ai-location').value.trim();
+    const channel  = document.getElementById('ai-channel').value;
+    const myName   = document.getElementById('ai-my-name').value.trim();
+    const tone     = document.getElementById('ai-tone').value;
+    const extra    = document.getElementById('ai-extra').value.trim();
+
+    if (!name) { showToast('⚠️ Ingresa el nombre del negocio', 'error'); return; }
+
+    const channelLabels = { whatsapp:'WhatsApp', email:'correo electrónico', instagram:'Instagram DM', llamada:'llamada telefónica', presencial:'visita presencial' };
+    const toneLabels = { profesional:'formal y profesional', amigable:'amigable y cercano', directo:'directo y conciso', persuasivo:'persuasivo y vendedor' };
+
+    const prompt = `Eres un experto en ventas y desarrollo de negocios. Genera un mensaje de presentación/contacto para ofrecer servicios de desarrollo web.
+
+DATOS DEL NEGOCIO:
+- Nombre: ${name}
+- Categoría: ${category || 'no especificada'}
+- Ubicación: ${location || 'no especificada'}
+- Canal de contacto: ${channelLabels[channel]}
+${myName ? `- Quien contacta: ${myName}` : ''}
+${extra ? `- Información adicional: ${extra}` : ''}
+
+INSTRUCCIONES:
+- Tono: ${toneLabels[tone]}
+- El mensaje es para ofrecer servicios de DESARROLLO WEB (crear página web para el negocio)
+- Canal: ${channelLabels[channel]} — ajusta el formato y extensión al canal (WhatsApp = breve, email = más formal y estructurado)
+- Menciona de forma natural los beneficios de tener una web: más clientes, imagen profesional, reservas online, etc.
+- Si es para WhatsApp o Instagram, sé breve (máx 5-6 líneas) y usa un CTA claro al final
+- Si es email, puedes ser más detallado con un asunto atractivo al inicio
+- NO uses emojis excesivos, solo 1-2 si el tono lo permite
+- Escribe el mensaje listo para copiar y pegar
+
+Genera SOLO el mensaje de contacto, sin explicaciones previas ni comentarios después.`;
+
+    const output = document.getElementById('ai-output');
+    const btn = document.getElementById('ai-generate-btn');
+    const copyRow = document.getElementById('ai-copy-row');
+
+    output.className = 'ai-output visible loading';
+    output.textContent = '✨ Generando mensaje...';
+    copyRow.style.display = 'none';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-circle-notch ai-spinner"></i> Generando...';
+
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 1000,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+        const data = await response.json();
+        if (data.content && data.content[0]?.text) {
+            output.className = 'ai-output visible';
+            output.textContent = data.content[0].text;
+            copyRow.style.display = 'flex';
+        } else {
+            throw new Error(data.error?.message || 'Respuesta vacía');
+        }
+    } catch (err) {
+        output.className = 'ai-output visible';
+        output.textContent = '⚠️ Error al generar: ' + err.message;
+        showToast('Error con la IA: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-magic"></i> Generar Mensaje';
+    }
+}
+
+function copyAIMessage() {
+    const text = document.getElementById('ai-output').textContent;
+    if (!text || text.startsWith('⚠️') || text.startsWith('✨')) return;
+    navigator.clipboard.writeText(text).then(() => showToast('📋 Mensaje copiado al portapapeles', 'success'));
+}
+
+function saveAIMessageToNotes() {
+    if (!lastAIBusinessId) { showToast('Primero carga un negocio desde la tabla', 'error'); return; }
+    const text = document.getElementById('ai-output').textContent;
+    if (!text || text.startsWith('⚠️') || text.startsWith('✨')) return;
+    const arr = getBusinesses();
+    const i = arr.findIndex(b => b.id === lastAIBusinessId);
+    if (i === -1) { showToast('Negocio no encontrado', 'error'); return; }
+    const existing = arr[i].notes || '';
+    arr[i].notes = existing ? existing + '\n\n---\n🤖 Mensaje IA:\n' + text : '🤖 Mensaje IA:\n' + text;
+    saveBusinesses(arr);
+    showToast('✅ Mensaje guardado en notas del negocio', 'success');
+}
+
+// ══════════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════════
+function escapeHtml(t) {
+    if (!t) return '';
+    const d = document.createElement('div');
+    d.textContent = t;
+    return d.innerHTML;
+}
+function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    document.getElementById('toast-msg').textContent = msg;
+    t.className = `toast ${type}`;
+    icon.className = `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
+    t.style.display = 'flex';
+    clearTimeout(t._to);
+    t._to = setTimeout(() => t.style.display = 'none', 3500);
+}
+function getStatusText(s) { return { pendiente:'Pendiente', contactado:'Contactado', interesado:'Interesado', cerrado:'Cerrado' }[s] || s; }
+function getStatusDot(s) { return { pendiente:'🟡', contactado:'🔵', interesado:'🟢', cerrado:'🟣' }[s] || '⚪'; }
+function formatDate(d) { if (!d) return '—'; try { return new Date(d+'T12:00:00').toLocaleDateString('es',{day:'2-digit',month:'short',year:'numeric'}); } catch { return d; } }
+function renderFilteredAndSorted() { renderTable(); }
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    initStarRating();
+    loadEmailsToForm([]);
+    selectAssigned('yo');
+
+    document.getElementById('businessForm').addEventListener('submit', handleFormSubmit);
+    document.getElementById('cancelBtn').addEventListener('click', cancelEdit);
+    document.getElementById('addEmailBtn').addEventListener('click', () => {
+        const c = document.getElementById('emailsContainer');
+        const d = document.createElement('div');
+        d.className = 'email-item';
+        d.innerHTML = `<input type="email" class="email-input" placeholder="correo@negocio.com">
+            <button type="button" class="remove-email" onclick="removeEmailRow(this)"><i class="fas fa-times"></i></button>`;
+        c.appendChild(d);
+        updateRemoveBtns();
+        c.querySelector('.email-item .remove-email').style.display = 'flex';
+    });
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+        currentSearch = e.target.value;
+        renderTable();
+    });
+
+    document.querySelectorAll('.filter-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderTable();
+        });
+    });
+
+    document.querySelectorAll('th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const col = th.dataset.sort;
+            currentSort.dir = currentSort.col === col && currentSort.dir === 'asc' ? 'desc' : 'asc';
+            currentSort.col = col;
+            renderTable();
+        });
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+        document.getElementById('csvFile').click();
+    });
+
+    document.getElementById('detailModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('detailModal')) closeDetailModal();
+    });
+    document.getElementById('businessPickerModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('businessPickerModal')) closeBusinessPicker();
+    });
+
+    renderTable();
+    updateStats();
+});
 </script>
-
 </body>
 </html>
